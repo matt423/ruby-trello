@@ -15,23 +15,23 @@ module Trello
     end
 
     it 'gets its id' do
-      @item.id.should == @detail['id']
+      expect(@item.id).to eq(@detail['id'])
     end
 
     it 'gets its name' do
-      @item.name.should == @detail['name']
+      expect(@item.name).to eq(@detail['name'])
     end
 
     it 'knows its type' do
-      @item.type.should == @detail['type']
+      expect(@item.type).to eq(@detail['type'])
     end
 
     it 'knows its state' do
-      @item.state.should == @detail['state']
+      expect(@item.state).to eq(@detail['state'])
     end
 
     it 'knows its pos' do
-      @item.pos.should == @detail['pos']
+      expect(@item.pos).to eq(@detail['pos'])
     end
   end
 end

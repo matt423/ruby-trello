@@ -9,7 +9,7 @@ module Trello
     let(:member) { Member.new(user_payload) }
 
     before(:each) do
-      client.stub(:get).with("/boards/abcdef123456789123456789", {}).
+      allow(client).to receive(:get).with("/boards/abcdef123456789123456789", {}).
         and_return JSON.generate(boards_details.first)
     end
 
@@ -17,12 +17,12 @@ module Trello
       let(:client) { Trello.client }
 
       it "delegates to client#find" do
-        client.should_receive(:find).with(:board, 'abcdef123456789123456789', {})
+        expect(client).to receive(:find).with(:board, 'abcdef123456789123456789', {})
         Board.find('abcdef123456789123456789')
       end
 
       it "is equivalent to client#find" do
-        Board.find('abcdef123456789123456789').should eq(board)
+        expect(Board.find('abcdef123456789123456789')).to eq(board)
       end
     end
 
@@ -30,64 +30,64 @@ module Trello
       let(:client) { Trello.client }
 
       it "gets all boards" do
-        Member.stub_chain(:find, :username).and_return "testuser"
-        client.stub(:get).with("/members/testuser/boards").and_return boards_payload
+        allow(Member).to receive_message_chain(:find, :username).and_return "testuser"
+        allow(client).to receive(:get).with("/members/testuser/boards").and_return boards_payload
 
         expected = Board.new(boards_details.first)
-        Board.all.first.should eq(expected)
+        expect(Board.all.first).to eq(expected)
       end
     end
 
     context "fields" do
       it "gets an id" do
-        board.id.should_not be_nil
+        expect(board.id).not_to be_nil
       end
 
       it "gets a name" do
-        board.name.should_not be_nil
+        expect(board.name).not_to be_nil
       end
 
       it "gets the description" do
-        board.description.should_not be_nil
+        expect(board.description).not_to be_nil
       end
 
       it "knows if it is closed or open" do
-        board.closed?.should_not be_nil
+        expect(board.closed?).not_to be_nil
       end
 
       it "knows if it is starred or not" do
-        board.starred?.should_not be_nil
+        expect(board.starred?).not_to be_nil
       end
 
       it "gets its url" do
-        board.url.should_not be_nil
+        expect(board.url).not_to be_nil
       end
     end
 
     context "actions" do
       it "has a list of actions" do
-        client.stub(:get).with("/boards/abcdef123456789123456789/actions", {filter: :all}).
+        allow(client).to receive(:get).with("/boards/abcdef123456789123456789/actions", {filter: :all}).
           and_return actions_payload
 
-        board.actions.count.should be > 0
+        expect(board.actions.count).to be > 0
       end
     end
 
     context "cards" do
       it "gets its list of cards" do
-        client.stub(:get).with("/boards/abcdef123456789123456789/cards", { filter: :open }).
+        allow(client).to receive(:get).with("/boards/abcdef123456789123456789/cards", { filter: :open }).
           and_return cards_payload
 
-        board.cards.count.should be > 0
+        expect(board.cards.count).to be > 0
       end
     end
 
     context "labels" do
       it "gets the specific labels for the board" do
-        client.stub(:get).with("/boards/abcdef123456789123456789/labels").
+        allow(client).to receive(:get).with("/boards/abcdef123456789123456789/labels").
           and_return label_payload
         labels = board.labels false
-        labels.count.should eq(4)
+        expect(labels.count).to eq(4)
 
 
         expect(labels[2].color).to  eq('red')
@@ -104,64 +104,64 @@ module Trello
       end
 
       it "gets the specific labels for the board" do
-        client.stub(:get).with("/boards/abcdef123456789123456789/labelnames").
+        allow(client).to receive(:get).with("/boards/abcdef123456789123456789/labelnames").
           and_return label_name_payload
 
-        board.labels.count.should eq(6)
+        expect(board.labels.count).to eq(6)
       end
     end
 
     context "find_card" do
       it "gets a card" do
-        client.stub(:get).with("/boards/abcdef123456789123456789/cards/1").
+        allow(client).to receive(:get).with("/boards/abcdef123456789123456789/cards/1").
           and_return card_payload
-        board.find_card(1).should be_a(Card)
+        expect(board.find_card(1)).to be_a(Card)
       end
     end
 
     context "add_member" do
       it "adds a member to the board as a normal user (default)" do
-        client.stub(:put).with("/boards/abcdef123456789123456789/members/id", type: :normal)
+        allow(client).to receive(:put).with("/boards/abcdef123456789123456789/members/id", type: :normal)
         board.add_member(member)
       end
 
       it "adds a member to the board as an admin" do
-        client.stub(:put).with("/boards/abcdef123456789123456789/members/id", type: :admin)
+        allow(client).to receive(:put).with("/boards/abcdef123456789123456789/members/id", type: :admin)
         board.add_member(member, :admin)
       end
     end
 
     context "remove_member" do
       it "removes a member from the board" do
-        client.stub(:delete).with("/boards/abcdef123456789123456789/members/id")
+        allow(client).to receive(:delete).with("/boards/abcdef123456789123456789/members/id")
         board.remove_member(member)
       end
     end
 
     context "lists" do
       it "has a list of lists" do
-        client.stub(:get).with("/boards/abcdef123456789123456789/lists", hash_including(filter: :open)).
+        allow(client).to receive(:get).with("/boards/abcdef123456789123456789/lists", hash_including(filter: :open)).
           and_return lists_payload
 
-        board.has_lists?.should be true
+        expect(board.has_lists?).to be true
       end
     end
 
     context "members" do
       it "has a list of members" do
-        client.stub(:get).with("/boards/abcdef123456789123456789/members", hash_including(filter: :all)).
+        allow(client).to receive(:get).with("/boards/abcdef123456789123456789/members", hash_including(filter: :all)).
           and_return JSON.generate([user_details])
 
-        board.members.count.should be > 0
+        expect(board.members.count).to be > 0
       end
     end
 
     context "organization" do
       it "belongs to an organization" do
-        client.stub(:get).with("/organizations/abcdef123456789123456789", {}).
+        allow(client).to receive(:get).with("/organizations/abcdef123456789123456789", {}).
           and_return JSON.generate(orgs_details.first)
 
-        board.organization.should_not be_nil
+        expect(board.organization).not_to be_nil
       end
     end
 
@@ -192,12 +192,12 @@ module Trello
 
         expected.each_pair do |key, value|
           if board.respond_to?(key)
-            board.send(key).should == value
+            expect(board.send(key)).to eq(value)
           end
         end
 
-        board.description.should == expected['desc']
-        board.organization_id.should == expected['idOrganization']
+        expect(board.description).to eq(expected['desc'])
+        expect(board.organization_id).to eq(expected['idOrganization'])
       end
 
       it "sets any attributes supplied in the fields argument"
@@ -211,17 +211,17 @@ module Trello
       end
 
       it "cannot currently save a new instance" do
-        client.should_not_receive :put
+        expect(client).not_to receive :put
 
         the_new_board = Board.new
-        -> { the_new_board.save }.should raise_error
+        expect { the_new_board.save }.to raise_error(Trello::ConfigurationError)
       end
 
       it "puts all fields except id" do
         expected_fields = %w{ name description closed starred idOrganization}.map { |s| s.to_sym }
 
-        client.should_receive(:put) do |anything, body|
-          body.keys.should =~ expected_fields
+        expect(client).to receive(:put) do |anything, body|
+          expect(body.keys).to match_array(expected_fields)
           any_board_json
         end
 
@@ -230,20 +230,20 @@ module Trello
       end
 
       it "mutates the current instance" do
-        client.stub(:put).and_return any_board_json
+        allow(client).to receive(:put).and_return any_board_json
 
         board = Board.new 'id' => "xxx"
 
         the_result_of_save = board.save
 
-        the_result_of_save.should equal board
+        expect(the_result_of_save).to equal board
       end
 
       it "uses the correct resource" do
         expected_resource_id = "xxx_board_id_xxx"
 
-        client.should_receive(:put) do |path, anything|
-          path.should =~ /#{expected_resource_id}\/$/
+        expect(client).to receive(:put) do |path, anything|
+          expect(path).to match(/#{expected_resource_id}\/$/)
           any_board_json
         end
 
@@ -269,7 +269,7 @@ module Trello
         board.closed      = true
         board.starred      = true
 
-        client.should_receive(:put).with("/boards/#{board.id}/", {
+        expect(client).to receive(:put).with("/boards/#{board.id}/", {
           name: "new name",
           description: "new description",
           closed: true,
@@ -293,22 +293,22 @@ module Trello
         expected_attributes = { name: "Any new board name", description: "Any new board desription" }
         sent_attributes = { name: expected_attributes[:name], desc: expected_attributes[:description] }
 
-        client.should_receive(:post).with("/boards", sent_attributes).and_return any_board_json
+        expect(client).to receive(:post).with("/boards", sent_attributes).and_return any_board_json
 
         Board.create expected_attributes
       end
 
       it "posts to the boards collection" do
-        client.should_receive(:post).with("/boards", anything).and_return any_board_json
+        expect(client).to receive(:post).with("/boards", anything).and_return any_board_json
 
         Board.create xxx: ""
       end
 
       it "returns a board" do
-        client.stub(:post).with("/boards", anything).and_return any_board_json
+        allow(client).to receive(:post).with("/boards", anything).and_return any_board_json
 
         the_new_board = Board.create xxx: ""
-        the_new_board.should be_a Board
+        expect(the_new_board).to be_a Board
       end
 
       it "at least name is required"

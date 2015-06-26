@@ -9,7 +9,7 @@ module Trello
     let(:client) { Client.new }
 
     before(:each) do
-      client.stub(:get).with('/organizations/4ee7e59ae582acdec8000291', {}).
+      allow(client).to receive(:get).with('/organizations/4ee7e59ae582acdec8000291', {}).
         and_return organization_payload
     end
 
@@ -17,19 +17,19 @@ module Trello
       let(:client) { Trello.client }
 
       it 'delegates to Trello.client#find' do
-        client.should_receive(:find).with(:organization, '4ee7e59ae582acdec8000291', {})
+        expect(client).to receive(:find).with(:organization, '4ee7e59ae582acdec8000291', {})
         Organization.find('4ee7e59ae582acdec8000291')
       end
 
       it 'is equivalent to client#find' do
-        Organization.find('4ee7e59ae582acdec8000291').should eq(organization)
+        expect(Organization.find('4ee7e59ae582acdec8000291')).to eq(organization)
       end
     end
 
     context 'actions' do
       it 'retrieves actions' do
-        client.stub(:get).with('/organizations/4ee7e59ae582acdec8000291/actions', { filter: :all }).and_return actions_payload
-        organization.actions.count.should be > 0
+        allow(client).to receive(:get).with('/organizations/4ee7e59ae582acdec8000291/actions', { filter: :all }).and_return actions_payload
+        expect(organization.actions.count).to be > 0
       end
     end
   end

@@ -10,7 +10,7 @@ describe "Authorizing read-only requests", broken: true do
       key: @developer_public_key
     }
 
-    get(uri).code.should === 200
+    expect(get(uri).code).to be === 200
   end
 
   it "Reading private resources requires developer public key AND a member token" do
@@ -20,7 +20,7 @@ describe "Authorizing read-only requests", broken: true do
       token: @member_token
     }
 
-    get(uri).code.should === 200
+    expect(get(uri).code).to be === 200
   end
 
   it "can fetch the welcome board" do
@@ -30,8 +30,8 @@ describe "Authorizing read-only requests", broken: true do
     Container.set Trello::Authorization, "AuthPolicy", BasicAuthPolicy
 
     welcome_board = Board.find @welcome_board
-    welcome_board.name.should === "Welcome Board"
-    welcome_board.id.should === @welcome_board
+    expect(welcome_board.name).to be === "Welcome Board"
+    expect(welcome_board.id).to be === @welcome_board
   end
 end
 

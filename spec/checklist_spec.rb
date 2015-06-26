@@ -8,7 +8,7 @@ module Trello
     let(:client) { Client.new }
 
     before(:each) do
-      client.stub(:get).with("/checklists/abcdef123456789123456789", {}).
+      allow(client).to receive(:get).with("/checklists/abcdef123456789123456789", {}).
           and_return JSON.generate(checklists_details.first)
     end
 
@@ -16,12 +16,12 @@ module Trello
       let(:client) { Trello.client }
 
       it "delegates to Trello.client#find" do
-        client.should_receive(:find).with(:checklist, 'abcdef123456789123456789', {})
+        expect(client).to receive(:find).with(:checklist, 'abcdef123456789123456789', {})
         Checklist.find('abcdef123456789123456789')
       end
 
       it "is equivalent to client#find" do
-        Checklist.find('abcdef123456789123456789').should eq(checklist)
+        expect(Checklist.find('abcdef123456789123456789')).to eq(checklist)
       end
     end
 
@@ -38,11 +38,11 @@ module Trello
 
         expected_payload = {name: "Test Checklist", idBoard: "abcdef123456789123456789"}
 
-        client.should_receive(:post).with("/checklists", expected_payload).and_return result
+        expect(client).to receive(:post).with("/checklists", expected_payload).and_return result
 
         checklist = Checklist.create(checklists_details.first.merge(payload.merge(board_id: boards_details.first['id'])))
 
-        checklist.class.should be Checklist
+        expect(checklist.class).to be Checklist
       end
     end
 
@@ -50,13 +50,13 @@ module Trello
       let(:client) { Trello.client }
 
       it "deletes a checklist" do
-        client.should_receive(:delete).with("/checklists/#{checklist.id}")
+        expect(client).to receive(:delete).with("/checklists/#{checklist.id}")
         checklist.delete
       end
 
       it "deletes a checklist item" do
         item_id = checklist.check_items.first.last
-        client.should_receive(:delete).with("/checklists/#{checklist.id}/checkItems/#{item_id}")
+        expect(client).to receive(:delete).with("/checklists/#{checklist.id}/checkItems/#{item_id}")
         checklist.delete_checklist_item(item_id)
       end
     end
@@ -71,7 +71,7 @@ module Trello
         }
 
         result = JSON.generate(checklists_details.first)
-        client.should_receive(:put).once.with(expected_resource, payload).and_return result
+        expect(client).to receive(:put).once.with(expected_resource, payload).and_return result
 
         checklist.name = expected_new_name
         checklist.save
@@ -86,7 +86,7 @@ module Trello
         }
 
         result = JSON.generate(checklists_details.first)
-        client.should_receive(:put).once.with(expected_resource, payload).and_return result
+        expect(client).to receive(:put).once.with(expected_resource, payload).and_return result
 
         checklist.position = expected_new_position
         checklist.save
@@ -107,7 +107,7 @@ module Trello
             pos: expected_pos
         }
         result = JSON.generate(result_hash)
-        client.should_receive(:post).once.with("/checklists/abcdef123456789123456789/checkItems", payload).and_return result
+        expect(client).to receive(:post).once.with("/checklists/abcdef123456789123456789/checkItems", payload).and_return result
 
         checklist.add_item(expected_item_name, expected_checked, expected_pos)
       end
@@ -115,15 +115,15 @@ module Trello
 
     context "board" do
       it "has a board" do
-        client.stub(:get).with("/boards/abcdef123456789123456789").and_return JSON.generate(boards_details.first)
-        checklist.board.should_not be_nil
+        allow(client).to receive(:get).with("/boards/abcdef123456789123456789").and_return JSON.generate(boards_details.first)
+        expect(checklist.board).not_to be_nil
       end
     end
 
     context "list" do
       it 'has a list' do
-        client.stub(:get).with("/lists/abcdef123456789123456789", {}).and_return JSON.generate(lists_details.first)
-        checklist.list.should_not be_nil
+        allow(client).to receive(:get).with("/lists/abcdef123456789123456789", {}).and_return JSON.generate(lists_details.first)
+        expect(checklist.list).not_to be_nil
       end
     end
   end
